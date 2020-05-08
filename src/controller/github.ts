@@ -25,6 +25,8 @@ const actionWords = {
     "synchronize": "同步更新",
     "submitted": "提交审批",
     "dismissed": "审批未通过",
+    "review_requested": "重发审批请求",
+    "review_request_removed": "审批请求被移除",
 };
 
 export default class GithubWebhookController {
