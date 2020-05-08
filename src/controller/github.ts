@@ -9,7 +9,7 @@ import ChatRobot from "./chat";
 import { config } from "../config";
 import customLog from "../log";
 const log = customLog("github handler");
-import { Issues, Push, PullRequest, PullRequestPull_request, PullRequestRepository, PullRequestSender } from "github-webhook-event-types";
+import { Issues, Push, PullRequest, PullRequestReview } from "github-webhook-event-types";
 
 const HEADER_KEY: string = "x-github-event";
 // 陷入了沉思，为什么gitlab这里没有过去式，而github这里的action全加上了过去式
@@ -26,14 +26,6 @@ const actionWords = {
     "submitted": "提交审批",
     "dismissed": "审批未通过",
 };
-
-export interface PullRequestReview {
-    action: string;
-    number: number;
-    pull_request: PullRequestPull_request;
-    repository: PullRequestRepository;
-    review: PullRequestSender;
-}
 
 export default class GithubWebhookController {
     public static async getWebhook(ctx: BaseContext) {
@@ -152,7 +144,7 @@ export default class GithubWebhookController {
         );
         log.info("pr http body", body);
         const { action, review, pull_request, repository } = body;
-        const mdMsg = `${review.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
+        const mdMsg = `${review.user.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
                         标题：${pull_request.title}
                         源分支：${pull_request.head.ref}
                         目标分支：${pull_request.base.ref}
