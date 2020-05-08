@@ -135,10 +135,10 @@ export default class GithubWebhookController {
     }
 
     /**
- * 处理merge request review 事件
- * @param ctx koa context
- * @param robotid 机器人id
- */
+     * 处理merge request review 事件
+     * @param ctx koa context
+     * @param robotid 机器人id
+     */
     public static async handlePRReview(ctx: BaseContext, robotid?: string) {
         const body: PullRequestReview = JSON.parse(ctx.request.body.payload);
         const robot: ChatRobot = new ChatRobot(
