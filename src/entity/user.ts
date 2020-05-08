@@ -18,3 +18,15 @@ export class User {
     @IsEmail()
     email: string;
 }
+
+export enum Github2WeChat {
+    AnneXuHui = 100000202,
+    cman2618 = 100000053,
+    Highsys = 100000048,
+    JamesYuen = 100000060,
+    JingYuazaas = 100000510,
+    liumeixiaazaas = 100000516,
+    LiuQing1997 = 100000210,
+    visionlzy = 100000148,
+    wilson2young = 100000051,
+}

@@ -9,7 +9,7 @@ import ChatRobot from "./chat";
 import { config } from "../config";
 import customLog from "../log";
 const log = customLog("github handler");
-import { Issues, Push, PullRequest } from "github-webhook-event-types";
+import { Issues, Push, PullRequest, PullRequestPull_request, PullRequestRepository, PullRequestSender } from "github-webhook-event-types";
 
 const HEADER_KEY: string = "x-github-event";
 // 陷入了沉思，为什么gitlab这里没有过去式，而github这里的action全加上了过去式
@@ -22,9 +22,18 @@ const actionWords = {
     "created": "创建",
     "requested": "请求",
     "completed": "完成",
-    "synchronize": "同步更新"
+    "synchronize": "同步更新",
+    "submitted": "提交审批",
+    "dismissed": "审批未通过",
 };
 
+export interface PullRequestReview {
+    action: string;
+    number: number;
+    pull_request: PullRequestPull_request;
+    repository: PullRequestRepository;
+    review: PullRequestSender;
+}
 
 export default class GithubWebhookController {
     public static async getWebhook(ctx: BaseContext) {
@@ -47,6 +56,8 @@ export default class GithubWebhookController {
                 return await GithubWebhookController.handlePush(ctx, robotid);
             case "pull_request":
                 return await GithubWebhookController.handlePR(ctx, robotid);
+            case "pull_request_review":
+                return await GithubWebhookController.handlePRReview(ctx, robotid);
             case "ping":
                 return await GithubWebhookController.handlePing(ctx, robotid);
             case "issues":
@@ -87,7 +98,7 @@ export default class GithubWebhookController {
         );
         let msg: String;
         log.info("push http body", body);
-        const { pusher, repository, commits, ref} = body;
+        const { pusher, repository, commits, ref } = body;
         const user_name = pusher.name;
         if (repository.name === "project_test" && user_name === "user_test") {
             msg = "收到一次webhook test";
@@ -118,8 +129,30 @@ export default class GithubWebhookController {
             config.chatid
         );
         log.info("pr http body", body);
-        const {action, sender, pull_request, repository} = body;
+        const { action, sender, pull_request, repository } = body;
         const mdMsg = `${sender.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
+                        标题：${pull_request.title}
+                        源分支：${pull_request.head.ref}
+                        目标分支：${pull_request.base.ref}
+                        [查看PR详情](${pull_request.html_url})`;
+        await robot.sendMdMsg(mdMsg);
+        ctx.status = 200;
+        return;
+    }
+
+    /**
+ * 处理merge request review 事件
+ * @param ctx koa context
+ * @param robotid 机器人id
+ */
+    public static async handlePRReview(ctx: BaseContext, robotid?: string) {
+        const body: PullRequestReview = JSON.parse(ctx.request.body.payload);
+        const robot: ChatRobot = new ChatRobot(
+            config.chatid
+        );
+        log.info("pr http body", body);
+        const { action, review, pull_request, repository } = body;
+        const mdMsg = `${review.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
                         标题：${pull_request.title}
                         源分支：${pull_request.head.ref}
                         目标分支：${pull_request.base.ref}
