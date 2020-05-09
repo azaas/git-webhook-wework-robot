@@ -23,10 +23,12 @@ const actionWords = {
     "requested": "请求",
     "completed": "完成",
     "synchronize": "同步更新",
-    "submitted": "提交审批",
+    "submitted": "审批通过",
     "dismissed": "审批未通过",
     "review_requested": "重发审批请求",
     "review_request_removed": "审批请求被移除",
+    "labeled": "审批请求添加标签",
+    "assigned": "分配给",
 };
 
 export default class GithubWebhookController {
@@ -124,11 +126,20 @@ export default class GithubWebhookController {
         );
         log.info("pr http body", body);
         const { action, sender, pull_request, repository } = body;
-        const mdMsg = `${sender.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
-                        标题：${pull_request.title}
-                        源分支：${pull_request.head.ref}
-                        目标分支：${pull_request.base.ref}
-                        [查看PR详情](${pull_request.html_url})`;
+        let mdMsg = `${sender.login}在 [${repository.full_name}](${repository.html_url})`;
+        switch (action) {
+            case "assigned":
+                const assigne = JSON.parse(ctx.request.body.payload).assignee;
+                mdMsg += `把PR ${actionWords[action]} ${assigne.login} `;
+                break;
+            default:
+                mdMsg += ` ${actionWords[action]}了PR`;
+                break;
+        }
+        mdMsg += ` 标题：${pull_request.title}
+                源分支：${pull_request.head.ref}
+                目标分支：${pull_request.base.ref}
+                [查看PR详情](${pull_request.html_url})`;
         await robot.sendMdMsg(mdMsg);
         ctx.status = 200;
         return;
