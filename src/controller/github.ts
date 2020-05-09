@@ -136,7 +136,8 @@ export default class GithubWebhookController {
                 mdMsg += ` ${actionWords[action]}了PR`;
                 break;
         }
-        mdMsg += ` 标题：${pull_request.title}
+        mdMsg += `
+        标题：${pull_request.title}
                 源分支：${pull_request.head.ref}
                 目标分支：${pull_request.base.ref}
                 [查看PR详情](${pull_request.html_url})`;
