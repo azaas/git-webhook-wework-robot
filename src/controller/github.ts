@@ -25,7 +25,7 @@ const actionWords = {
     "synchronize": "同步更新",
     "submitted": "审批通过",
     "dismissed": "审批未通过",
-    "review_requested": "重发审批请求",
+    "review_requested": "添加审批人",
     "review_request_removed": "审批请求被移除",
     "labeled": "审批请求添加标签",
     "assigned": "分配给",
@@ -131,6 +131,10 @@ export default class GithubWebhookController {
             case "assigned":
                 const assigne = JSON.parse(ctx.request.body.payload).assignee;
                 mdMsg += `把PR ${actionWords[action]} ${assigne.login} `;
+                break;
+            case "review_requested":
+                const reviewer = JSON.parse(ctx.request.body.payload).requested_reviewer;
+                mdMsg += `${actionWords[action]}:${reviewer.login} `;
                 break;
             default:
                 mdMsg += ` ${actionWords[action]}了PR`;
