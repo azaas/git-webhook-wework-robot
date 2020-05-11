@@ -26,7 +26,7 @@ const actionWords = {
     "submitted": "审批通过",
     "dismissed": "审批未通过",
     "review_requested": "添加审批人",
-    "review_request_removed": "审批请求被移除",
+    "review_request_removed": "移除审批人",
     "labeled": "审批请求添加标签",
     "unlabeled": "审批请求移除标签",
     "assigned": "分配给",
@@ -134,6 +134,7 @@ export default class GithubWebhookController {
                 mdMsg += `把PR ${actionWords[action]} ${assigne.login} `;
                 break;
             case "review_requested":
+            case "review_request_removed":
                 const reviewer = JSON.parse(ctx.request.body.payload).requested_reviewer;
                 mdMsg += `${actionWords[action]}:${reviewer.login} `;
                 break;
