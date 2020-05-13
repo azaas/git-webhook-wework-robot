@@ -144,6 +144,7 @@ export default class GithubWebhookController {
                 mdMsg += `${actionWords[action]}:${label.name} `;
                 break;
             case "submitted":
+            case "edited":
                 const review = JSON.parse(ctx.request.body.payload).review;
                 switch (review.state) {
                     case "commented":
