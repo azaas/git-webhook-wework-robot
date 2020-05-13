@@ -23,7 +23,7 @@ const actionWords = {
     "requested": "请求",
     "completed": "完成",
     "synchronize": "同步更新",
-    "submitted": "审批通过",
+    "submitted": "提交了审批结果",
     "dismissed": "审批未通过",
     "review_requested": "添加审批人",
     "review_request_removed": "移除审批人",
@@ -53,6 +53,7 @@ export default class GithubWebhookController {
                 return await GithubWebhookController.handlePush(ctx, robotid);
             case "pull_request":
                 return await GithubWebhookController.handlePR(ctx, robotid);
+            case "pull_request_review_comment":
             case "pull_request_review":
                 return await GithubWebhookController.handlePRReview(ctx, robotid);
             case "ping":
@@ -148,11 +149,11 @@ export default class GithubWebhookController {
                 const review = JSON.parse(ctx.request.body.payload).review;
                 switch (review.state) {
                     case "commented":
-                        mdMsg += ` 添加了评论`;
+                        mdMsg += ` 提交了评论`;
                         break;
                     case "approved":
                     default:
-                        mdMsg += ` ${actionWords[action]}了PR`;
+                        mdMsg += ` 审批通过了PR`;
                         break;
                 }
                 break;
@@ -161,7 +162,7 @@ export default class GithubWebhookController {
                 break;
         }
         mdMsg += `
-        标题：${pull_request.title}
+                标题：${pull_request.title}
                 源分支：${pull_request.head.ref}
                 目标分支：${pull_request.base.ref}
                 [查看PR详情](${pull_request.html_url})`;
@@ -182,11 +183,20 @@ export default class GithubWebhookController {
         );
         log.info("pr http body", body);
         const { action, review, pull_request, repository } = body;
-        const mdMsg = `${review.user.login}在 [${repository.full_name}](${repository.html_url}) ${actionWords[action]}了PR
-                        标题：${pull_request.title}
-                        源分支：${pull_request.head.ref}
-                        目标分支：${pull_request.base.ref}
-                        [查看PR详情](${pull_request.html_url})`;
+        let mdMsg = `${review.user.login}在 [${repository.full_name}](${repository.html_url}) `;
+        switch (review.state) {
+            case "commented":
+                mdMsg += `提交了评论`;
+                break;
+            default:
+                mdMsg += `${actionWords[action]}了PR`;
+                break;
+        }
+        mdMsg += `
+        标题：${pull_request.title}
+        源分支：${pull_request.head.ref}
+        目标分支：${pull_request.base.ref}
+        [查看PR详情](${pull_request.html_url})`;
         await robot.sendMdMsg(mdMsg);
         ctx.status = 200;
         return;
