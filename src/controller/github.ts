@@ -143,6 +143,18 @@ export default class GithubWebhookController {
                 const label = JSON.parse(ctx.request.body.payload).label;
                 mdMsg += `${actionWords[action]}:${label.name} `;
                 break;
+            case "submitted":
+                const review = JSON.parse(ctx.request.body.payload).review;
+                switch (review.state) {
+                    case "commented":
+                        mdMsg += ` 添加了评论`;
+                        break;
+                    case "approved":
+                    default:
+                        mdMsg += ` ${actionWords[action]}了PR`;
+                        break;
+                }
+                break;
             default:
                 mdMsg += ` ${actionWords[action]}了PR`;
                 break;
