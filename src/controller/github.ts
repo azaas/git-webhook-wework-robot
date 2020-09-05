@@ -159,10 +159,10 @@ export default class GithubWebhookController {
                 break;
             case "closed":
                 if (pull_request.merged) {
-                    mdMsg += ` ${actionWords[action]}了PR`;
+                    mdMsg += ` ${actionWords["merge"]}了PR`;
                 }
                 else {
-                    mdMsg += ` ${actionWords["merge"]}了PR`;
+                    mdMsg += ` ${actionWords[action]}了PR`;
                 }
                 break;
             default:
