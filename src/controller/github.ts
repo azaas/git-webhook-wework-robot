@@ -141,9 +141,10 @@ export default class GithubWebhookController {
                 break;
             case "unlabeled":
             case "labeled":
-                const label = JSON.parse(ctx.request.body.payload).label;
-                mdMsg += `${actionWords[action]}:${label.name} `;
-                break;
+                //const label = JSON.parse(ctx.request.body.payload).label;
+                //mdMsg += `${actionWords[action]}:${label.name} `;
+                //break;
+                return;
             case "submitted":
             case "edited":
                 const review = JSON.parse(ctx.request.body.payload).review;
